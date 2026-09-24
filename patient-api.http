@@ -1,0 +1,80 @@
+@baseUrl = http://localhost:5056
+
+### ============================================
+### Dintest Clinic - Patient API Tests
+### ============================================
+
+
+### 1. Check API
+GET {{baseUrl}}/
+Accept: application/json
+
+
+### 2. Get all patients
+GET {{baseUrl}}/api/patients
+Accept: application/json
+
+
+### 3. Get patient by ID
+GET {{baseUrl}}/api/patients/1
+Accept: application/json
+
+
+### 4. Test patient not found
+GET {{baseUrl}}/api/patients/999
+Accept: application/json
+
+
+### 5. Create a patient
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "Sarah",
+  "lastName": "Wilson",
+  "email": "sarah.wilson@example.com",
+  "phone": "0219876543"
+}
+
+
+
+### 6. Update patient #1
+PUT {{baseUrl}}/api/patients/1
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "john.smith.updated@example.com",
+  "phone": "0225551235"
+}
+
+
+### 7. Delete patient #2
+DELETE {{baseUrl}}/api/patients/1
+
+
+
+
+### Invalid patient - test validation
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "",
+  "lastName": "Test",
+  "email": "this-is-not-an-email",
+  "phone": "0211234567"
+}
+
+
+### Valid DTO test
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "Emma",
+  "lastName": "Taylor",
+  "email": "emma.taylor@example.com",
+  "phone": "0215550199"
+}
