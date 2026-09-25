@@ -1,80 +1,102 @@
 @baseUrl = http://localhost:5056
 
-### ============================================
-### Dintest Clinic - Patient API Tests
-### ============================================
 
+### ==========================================
+### 1. GET all patients
+### Expected: 200 OK
+### ==========================================
 
-### 1. Check API
-GET {{baseUrl}}/
-Accept: application/json
-
-
-### 2. Get all patients
 GET {{baseUrl}}/api/patients
 Accept: application/json
 
 
-### 3. Get patient by ID
-GET {{baseUrl}}/api/patients/1
+### ==========================================
+### 2. GET one patient
+### Expected: 200 OK if ID 4 exists
+### ==========================================
+
+GET {{baseUrl}}/api/patients/4
 Accept: application/json
 
 
-### 4. Test patient not found
-GET {{baseUrl}}/api/patients/999
-Accept: application/json
+### ==========================================
+### 3. CREATE patient
+### Expected: 201 Created
+### ==========================================
 
-
-### 5. Create a patient
 POST {{baseUrl}}/api/patients
 Content-Type: application/json
 
 {
-  "firstName": "Sarah",
-  "lastName": "Wilson",
-  "email": "sarah.wilson@example.com",
-  "phone": "0219876543"
+  "firstName": "Daniel",
+  "lastName": "Brown",
+  "email": "daniel.brown@example.com",
+  "phone": "0215551234"
 }
 
 
+### ==========================================
+### 4. INVALID create
+### Expected: 400 Bad Request
+### ==========================================
 
-### 6. Update patient #1
-PUT {{baseUrl}}/api/patients/1
-Content-Type: application/json
-
-{
-  "firstName": "John",
-  "lastName": "Smith",
-  "email": "john.smith.updated@example.com",
-  "phone": "0225551235"
-}
-
-
-### 7. Delete patient #2
-DELETE {{baseUrl}}/api/patients/1
-
-
-
-
-### Invalid patient - test validation
 POST {{baseUrl}}/api/patients
 Content-Type: application/json
 
 {
   "firstName": "",
-  "lastName": "Test",
-  "email": "this-is-not-an-email",
-  "phone": "0211234567"
+  "lastName": "Brown",
+  "email": "bad-email",
+  "phone": "0215551234"
 }
 
 
-### Valid DTO test
-POST {{baseUrl}}/api/patients
+### ==========================================
+### 5. UPDATE patient
+### Expected: 204 No Content
+### ==========================================
+
+PUT {{baseUrl}}/api/patients/3
 Content-Type: application/json
 
 {
-  "firstName": "Emma",
+  "firstName": "Maher",
   "lastName": "Taylor",
   "email": "emma.taylor@example.com",
-  "phone": "0215550199"
+  "phone": "0225550199"
+}
+
+
+### ==========================================
+### 6. GET updated patient
+### Expected: 200 OK
+### Verify the updated information
+### ==========================================
+
+GET {{baseUrl}}/api/patients/4
+Accept: application/json
+
+
+### ==========================================
+### 7. DELETE non-existent patient
+### Expected: 404 Not Found
+### ==========================================
+
+DELETE {{baseUrl}}/api/patients/999
+
+
+
+### ==========================================
+### 5. UPDATE patient
+### Expected: 200 OK
+### ==========================================
+
+PUT {{baseUrl}}/api/patients/3
+Content-Type: application/json
+
+{
+  "firstName": "Maher",
+  "lastName": "Taylor",
+  "email": "emma.taylor@example.com",
+  "phone": "0225550199"
 }

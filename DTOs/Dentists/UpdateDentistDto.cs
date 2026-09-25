@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace dentist_clinic_api.DTOs.Patients;
+namespace dentist_clinic_api.DTOs.Dentists;
 
-public class CreatePatientDto
+public class UpdateDentistDto
 {
     [Required]
     [MaxLength(100)]
@@ -21,4 +21,17 @@ public class CreatePatientDto
     [Phone]
     [MaxLength(30)]
     public string Phone { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(100)]
+    public string RegistrationNumber { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(150)]
+    public string Specialty { get; set; } = string.Empty;
+
+    [MaxLength(1000)]
+    public string? Biography { get; set; }
+
+    public bool IsActive { get; set; }
 }

@@ -1,0 +1,106 @@
+@baseUrl = http://localhost:5056
+
+### ============================================================
+### GET ALL APPOINTMENTS
+### ============================================================
+
+GET {{baseUrl}}/api/appointments
+Accept: application/json
+
+
+### ============================================================
+### GET APPOINTMENT BY ID
+### ============================================================
+
+GET {{baseUrl}}/api/appointments/2
+Accept: application/json
+
+
+### ============================================================
+### CREATE APPOINTMENT
+### Sarah Wilson (Dentist ID 2)
+### Routine Dental Examination (Service ID 1)
+### Duration: 30 minutes
+### ============================================================
+
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+Accept: application/json
+
+{
+  "patientId": 3,
+  "dentistId": 2,
+  "dentalServiceId": 1,
+  "startTime": "2026-10-05T09:00:00Z",
+  "notes": "Routine dental examination"
+}
+
+
+### ============================================================
+### TEST DOUBLE BOOKING
+### Should return: 409 Conflict
+###
+### Sarah already has:
+### 09:00 - 09:30
+###
+### This attempts:
+### 09:15 - 09:45
+### ============================================================
+
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+Accept: application/json
+
+{
+  "patientId": 2,
+  "dentistId": 2,
+  "dentalServiceId": 1,
+  "startTime": "2026-10-05T09:15:00Z",
+  "notes": "Testing dentist schedule conflict"
+}
+
+
+### ============================================================
+### CREATE NON-CONFLICTING APPOINTMENT
+### Same dentist, starts exactly when first appointment ends
+### Should return: 201 Created
+### ============================================================
+
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+Accept: application/json
+
+{
+  "patientId": 2,
+  "dentistId": 2,
+  "dentalServiceId": 1,
+  "startTime": "2026-10-05T09:30:00Z",
+  "notes": "Second appointment after first appointment"
+}
+
+
+### ============================================================
+### UPDATE APPOINTMENT
+### Change status to Confirmed
+### ============================================================
+
+PUT {{baseUrl}}/api/appointments/2
+Content-Type: application/json
+Accept: application/json
+
+{
+  "patientId": 2,
+  "dentistId": 2,
+  "dentalServiceId": 3,
+  "startTime": "2026-10-05T10:30:00Z",
+  "status": "Confirmed",
+  "notes": "Appointment confirmed"
+}
+
+
+### ============================================================
+### DELETE APPOINTMENT
+### ============================================================
+
+DELETE {{baseUrl}}/api/appointments/2
+Accept: application/json

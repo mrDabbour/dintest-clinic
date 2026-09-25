@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace dentist_clinic_api.DTOs.Patients;
 
-public class CreatePatientDto
+public class UpdatePatientDto
 {
     [Required]
     [MaxLength(100)]
