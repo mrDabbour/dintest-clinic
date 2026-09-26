@@ -26,46 +26,100 @@ public class AppointmentsController : ControllerBase
         _context = context;
     }
 
-    // =========================================================
-    // GET: api/appointments
-    // =========================================================
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetAppointments()
+  // =========================================================
+// GET: api/appointments
+// Supports filtering by dentist, patient, status and date
+// =========================================================
+[HttpGet]
+public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetAppointments(
+    [FromQuery] int? dentistId,
+    [FromQuery] int? patientId,
+    [FromQuery] string? status,
+    [FromQuery] DateTime? date)
+{
+    var query = _context.Appointments
+        .AsNoTracking()
+        .AsQueryable();
+
+    // Filter by dentist
+    if (dentistId.HasValue)
     {
-        var appointments = await _context.Appointments
-            .AsNoTracking()
-            .Include(a => a.Patient)
-            .Include(a => a.Dentist)
-            .Include(a => a.DentalService)
-            .OrderBy(a => a.StartTime)
-            .Select(a => new AppointmentResponseDto
-            {
-                Id = a.Id,
-
-                PatientId = a.PatientId,
-                PatientName = a.Patient.FirstName + " " + a.Patient.LastName,
-
-                DentistId = a.DentistId,
-                DentistName = a.Dentist.FirstName + " " + a.Dentist.LastName,
-
-                DentalServiceId = a.DentalServiceId,
-                ServiceName = a.DentalService.Name,
-
-                Price = a.DentalService.Price,
-
-                StartTime = a.StartTime,
-                EndTime = a.EndTime,
-
-                Status = a.Status,
-                Notes = a.Notes,
-
-                CreatedAt = a.CreatedAt,
-                UpdatedAt = a.UpdatedAt
-            })
-            .ToListAsync();
-
-        return Ok(appointments);
+        query = query.Where(a => a.DentistId == dentistId.Value);
     }
+
+    // Filter by patient
+    if (patientId.HasValue)
+    {
+        query = query.Where(a => a.PatientId == patientId.Value);
+    }
+
+    // Filter by status
+    if (!string.IsNullOrWhiteSpace(status))
+    {
+        var normalizedStatus = AllowedStatuses.FirstOrDefault(
+            allowedStatus =>
+                allowedStatus.Equals(
+                    status.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+        if (normalizedStatus == null)
+        {
+            return BadRequest(new
+            {
+                message =
+                    "Status must be Pending, Confirmed, Completed, Cancelled or NoShow."
+            });
+        }
+
+        query = query.Where(a => a.Status == normalizedStatus);
+    }
+
+    // Filter by calendar date
+    if (date.HasValue)
+    {
+        var startOfDay = DateTime.SpecifyKind(
+            date.Value.Date,
+            DateTimeKind.Utc);
+
+        var endOfDay = startOfDay.AddDays(1);
+
+        query = query.Where(a =>
+            a.StartTime >= startOfDay &&
+            a.StartTime < endOfDay);
+    }
+
+    var appointments = await query
+        .OrderBy(a => a.StartTime)
+        .Select(a => new AppointmentResponseDto
+        {
+            Id = a.Id,
+
+            PatientId = a.PatientId,
+            PatientName =
+                a.Patient.FirstName + " " + a.Patient.LastName,
+
+            DentistId = a.DentistId,
+            DentistName =
+                a.Dentist.FirstName + " " + a.Dentist.LastName,
+
+            DentalServiceId = a.DentalServiceId,
+            ServiceName = a.DentalService.Name,
+
+            Price = a.DentalService.Price,
+
+            StartTime = a.StartTime,
+            EndTime = a.EndTime,
+
+            Status = a.Status,
+            Notes = a.Notes,
+
+            CreatedAt = a.CreatedAt,
+            UpdatedAt = a.UpdatedAt
+        })
+        .ToListAsync();
+
+    return Ok(appointments);
+}
 
     // =========================================================
     // GET: api/appointments/5
@@ -418,6 +472,161 @@ public class AppointmentsController : ControllerBase
         return Ok(response);
     }
 
+
+
+
+// =========================================================
+// PATCH: api/appointments/5/confirm
+// =========================================================
+[HttpPatch("{id:int}/confirm")]
+public async Task<IActionResult> ConfirmAppointment(int id)
+{
+    var appointment = await _context.Appointments.FindAsync(id);
+
+    if (appointment == null)
+    {
+        return NotFound(new
+        {
+            message = $"Appointment with ID {id} was not found."
+        });
+    }
+
+    if (appointment.Status != "Pending")
+    {
+        return Conflict(new
+        {
+            message = "Only pending appointments can be confirmed."
+        });
+    }
+
+    appointment.Status = "Confirmed";
+    appointment.UpdatedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = "Appointment confirmed successfully.",
+        appointmentId = appointment.Id,
+        status = appointment.Status
+    });
+}
+
+
+// =========================================================
+// PATCH: api/appointments/5/cancel
+// =========================================================
+[HttpPatch("{id:int}/cancel")]
+public async Task<IActionResult> CancelAppointment(int id)
+{
+    var appointment = await _context.Appointments.FindAsync(id);
+
+    if (appointment == null)
+    {
+        return NotFound(new
+        {
+            message = $"Appointment with ID {id} was not found."
+        });
+    }
+
+    if (appointment.Status is "Completed" or "Cancelled" or "NoShow")
+    {
+        return Conflict(new
+        {
+            message =
+                $"An appointment with status '{appointment.Status}' cannot be cancelled."
+        });
+    }
+
+    appointment.Status = "Cancelled";
+    appointment.UpdatedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = "Appointment cancelled successfully.",
+        appointmentId = appointment.Id,
+        status = appointment.Status
+    });
+}
+
+
+// =========================================================
+// PATCH: api/appointments/5/complete
+// =========================================================
+[HttpPatch("{id:int}/complete")]
+public async Task<IActionResult> CompleteAppointment(int id)
+{
+    var appointment = await _context.Appointments.FindAsync(id);
+
+    if (appointment == null)
+    {
+        return NotFound(new
+        {
+            message = $"Appointment with ID {id} was not found."
+        });
+    }
+
+    if (appointment.Status != "Confirmed")
+    {
+        return Conflict(new
+        {
+            message = "Only confirmed appointments can be completed."
+        });
+    }
+
+    appointment.Status = "Completed";
+    appointment.UpdatedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = "Appointment completed successfully.",
+        appointmentId = appointment.Id,
+        status = appointment.Status
+    });
+}
+
+
+// =========================================================
+// PATCH: api/appointments/5/no-show
+// =========================================================
+[HttpPatch("{id:int}/no-show")]
+public async Task<IActionResult> MarkAppointmentAsNoShow(int id)
+{
+    var appointment = await _context.Appointments.FindAsync(id);
+
+    if (appointment == null)
+    {
+        return NotFound(new
+        {
+            message = $"Appointment with ID {id} was not found."
+        });
+    }
+
+    if (appointment.Status != "Confirmed")
+    {
+        return Conflict(new
+        {
+            message =
+                "Only confirmed appointments can be marked as no-show."
+        });
+    }
+
+    appointment.Status = "NoShow";
+    appointment.UpdatedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = "Appointment marked as no-show.",
+        appointmentId = appointment.Id,
+        status = appointment.Status
+    });
+}
     // =========================================================
     // DELETE: api/appointments/5
     // =========================================================
@@ -477,5 +686,7 @@ public class AppointmentsController : ControllerBase
             CreatedAt = appointment.CreatedAt,
             UpdatedAt = appointment.UpdatedAt
         };
+
+
     }
 }
