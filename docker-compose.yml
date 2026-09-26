@@ -12,5 +12,5 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Host=host.docker.internal;Port=1234;Database=dentist_clinic;Username=postgres;Password=${POSTGRES_PASSWORD}"
-
+      Jwt__Key: "${JWT_KEY}"
     restart: unless-stopped

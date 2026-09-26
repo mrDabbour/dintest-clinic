@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using dentist_clinic_api.Data;
 using dentist_clinic_api.Models;
 using dentist_clinic_api.DTOs.DentalServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dentist_clinic_api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Receptionist,Dentist")]
 public class DentalServicesController : ControllerBase
 {
     private readonly DentistDbContext _context;
@@ -60,6 +62,7 @@ public class DentalServicesController : ControllerBase
 
     // POST: api/dentalservices
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<DentalServiceResponseDto>> CreateDentalService(
         CreateDentalServiceDto dto)
     {
@@ -88,6 +91,7 @@ public class DentalServicesController : ControllerBase
 
     // PUT: api/dentalservices/1
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<DentalServiceResponseDto>> UpdateDentalService(
         int id,
         UpdateDentalServiceDto dto)
@@ -118,6 +122,7 @@ public class DentalServicesController : ControllerBase
     // DELETE: api/dentalservices/1
     // Soft delete: keep the service for appointment history.
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeactivateDentalService(int id)
     {
         var service = await _context.DentalServices.FindAsync(id);

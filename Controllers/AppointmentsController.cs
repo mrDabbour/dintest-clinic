@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using dentist_clinic_api.Data;
 using dentist_clinic_api.DTOs.Appointments;
 using dentist_clinic_api.Models;
 
+
 namespace dentist_clinic_api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Receptionist,Dentist")]
 public class AppointmentsController : ControllerBase
 {
     private readonly DentistDbContext _context;

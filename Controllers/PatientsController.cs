@@ -3,11 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using dentist_clinic_api.Data;
 using dentist_clinic_api.Models;
 using dentist_clinic_api.DTOs.Patients;
-
+using Microsoft.AspNetCore.Authorization;
 namespace dentist_clinic_api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Receptionist,Dentist")]
 public class PatientsController : ControllerBase
 {
     private readonly DentistDbContext _context;

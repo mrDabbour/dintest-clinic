@@ -1,3 +1,5 @@
+
+using dentist_clinic_api.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 using dentist_clinic_api.Models;
 
@@ -10,6 +12,7 @@ public class DentistDbContext : DbContext
     {
     }
 
+    public DbSet<User> Users { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
     public DbSet<Patient> Patients { get; set; }
     public DbSet<Dentist> Dentists { get; set; }
@@ -131,6 +134,36 @@ public class DentistDbContext : DbContext
                 a.DentistId,
                 a.StartTime
             });
+
         });
+
+        modelBuilder.Entity<User>(entity =>
+{
+    entity.Property(u => u.FirstName)
+        .HasMaxLength(100)
+        .IsRequired();
+
+    entity.Property(u => u.LastName)
+        .HasMaxLength(100)
+        .IsRequired();
+
+    entity.Property(u => u.Email)
+        .HasMaxLength(255)
+        .IsRequired();
+
+    entity.Property(u => u.PasswordHash)
+        .IsRequired();
+
+    entity.Property(u => u.Role)
+        .HasMaxLength(50)
+        .IsRequired();
+
+    entity.HasIndex(u => u.Email)
+        .IsUnique();
+
+    entity.HasIndex(u => u.Role);
+
+    entity.HasIndex(u => u.IsActive);
+});
     }
 }

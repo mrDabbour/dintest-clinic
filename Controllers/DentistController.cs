@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using dentist_clinic_api.Data;
 using dentist_clinic_api.Models;
 using dentist_clinic_api.DTOs.Dentists;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dentist_clinic_api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Receptionist,Dentist")]
 public class DentistsController : ControllerBase
 {
     private readonly DentistDbContext _context;
@@ -88,6 +90,7 @@ public class DentistsController : ControllerBase
     // Create a new dentist
     // ==========================================
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<DentistResponseDto>> CreateDentist(
         CreateDentistDto dto)
     {
@@ -154,6 +157,7 @@ public class DentistsController : ControllerBase
     // Returns: 200 OK + updated dentist
     // ==========================================
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<DentistResponseDto>> UpdateDentist(
         int id,
         UpdateDentistDto dto)
@@ -221,6 +225,7 @@ public class DentistsController : ControllerBase
     // Delete a dentist
     // ==========================================
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteDentist(int id)
     {
         var dentist = await _context.Dentists.FindAsync(id);
