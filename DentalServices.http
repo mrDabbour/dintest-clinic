@@ -1,0 +1,59 @@
+@baseUrl = http://localhost:5056
+
+### CREATE DENTAL SERVICE
+POST {{baseUrl}}/api/dentalservices
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Wisdom Tooth Consultation",
+  "category": "Oral Surgery",
+  "description": "Consultation and assessment for wisdom tooth treatment.",
+  "price": 130.00,
+  "durationMinutes": 30
+}
+
+
+###GET Dental Service ID# 21
+GET http://localhost:5056/api/dentalservices/21
+
+
+
+### UPDATE DENTAL SERVICE
+PUT {{baseUrl}}/api/dentalservices/21
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Wisdom Tooth Assessment",
+  "category": "Oral Surgery",
+  "description": "Full consultation and assessment for wisdom tooth treatment and extraction.",
+  "price": 160.00,
+  "durationMinutes": 45,
+  "isActive": true
+}
+
+
+
+### TEST VALIDATION - INVALID SERVICE
+POST {{baseUrl}}/api/dentalservices
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "",
+  "category": "",
+  "description": "",
+  "price": -50,
+  "durationMinutes": 0
+}
+
+
+### DEACTIVATE DENTAL SERVICE
+DELETE {{baseUrl}}/api/dentalservices/21
+Accept: application/json
+
+
+### VERIFY SERVICE AFTER DEACTIVATION
+GET {{baseUrl}}/api/dentalservices/21
+Accept: application/json
